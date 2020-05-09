@@ -1,0 +1,9 @@
+Sample:
+
+Input:
+
+1 1
+
+Output:
+
+4 0

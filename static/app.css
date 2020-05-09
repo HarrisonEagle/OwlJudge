@@ -7,4 +7,14 @@ body{
         border-radius: 5px;
         background-color: #d5d5d7;
         align-items: center;
-      }
+}
+.tab{
+  font-size: 20px;
+  width: 250px;
+}
+.currenttab{
+  font-size: 20px;
+  width: 250px;
+  color: whitesmoke;
+  background-color: blue;
+}
