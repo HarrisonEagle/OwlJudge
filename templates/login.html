@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% load static %}
+<head>
+    <title>OwlJudge</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block extrahead %}
+      <link href="{% static 'app.css' %}" rel="stylesheet">
+    {% endblock %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+ <header>
+    <nav class="navbar navbar-dark bg-primary">
+      <!-- Navbar content -->
+      <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+    </nav>
+  </header>
+
+
+
+<div class="area">
+     {% if form.errors  %}
+    <p>ユーザーID, パスワードが一致しません．</p>
+    {% endif %}
+    <form action="/owlapp/login" enctype="multipart/form-data" method="POST">
+    {% csrf_token %}
+    {% for field in login_form %}
+      <div class="form-group">
+        <label class="control-label" for="{{ field.name }}">{{ field.label }}</label>
+          {%if field.name == "password"%}
+          <input type="password" class="form-control"
+                 name="{{ field.name }}"
+                 id="{{ field.name }}">
+          {% else %}
+          <input type="" class="form-control"
+                 name="{{ field.name }}"
+                 id="{{ field.name }}">
+          {% endif %}
+    </div>
+    {% endfor %}
+    <input class="btn btn-primary" type="submit" value="submit">
+</form>
+
+<a href="registration">新規登録はこちら</a>
+</div>
+
+
+  <script>
+    $(document).ready(function() {
+
+    });
+    </script>

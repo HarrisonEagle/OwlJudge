@@ -19,6 +19,12 @@
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
       <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+       {% if currentuser != "" %}
+        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
+        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        {%else%}
+        <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
+        {%endif%}
     </nav>
   </header>
 
@@ -45,7 +51,6 @@
           <option>C</option>
           <option>C++</option>
           <option>Java</option>
-          <option>C#</option>
           <option>Python3</option>
           <option>Ruby</option>
           <option>Brainfuck</option>
@@ -57,6 +62,7 @@
     <label for="Result" style="font-size: 20px;">Result:</label>
     <p id='res' style="font-size: 25px;"></p>
     <p id='time' style="font-size: 25px;"></p>
+    <p id='memory' style="font-size: 25px;"></p>
 </div>
 
 
@@ -76,8 +82,9 @@
                     }else{
                         $('#res').css('color','green');
                     }
-                    $('#res').text(response.result); 
+                    $('#res').html(response.result.replace(/\r?\n/g, '<br>'));
                     $('#time').text("Time:"+response.timeusage+"ms");
+                    $('#memory').text("MemoryUsage:"+response.memoryusage+"KB");
                 },
             });
             return false;

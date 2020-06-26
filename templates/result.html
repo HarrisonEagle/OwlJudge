@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% load static %}
+<head>
+    <title>OwlJudge</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block extrahead %}
+      <link href="{% static 'app.css' %}" rel="stylesheet">
+    {% endblock %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+ <header>
+    <nav class="navbar navbar-dark bg-primary">
+      <!-- Navbar content -->
+      <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+        {% if currentuser != "" %}
+        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
+        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        {%else%}
+        <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
+        {%endif%}
+    </nav>
+  </header>
+
+<div class="menu">
+    <a href="/owlapp" class="tab">CodeTest</a>
+    <a href="/owlapp/problems" class="tab">ProblemTest</a>
+    <a href="/owlapp/submissions" class="currenttab">Submissions</a>
+  </div>
+<div class="area">
+  <p style="display: inline-block;margin: 20px;font-size: 30px;">Submission #<div id="submissionid" style="font-size: 30px;display: inline-block; _display: inline;">{{id}}</div></p>
+  <p style="display: inline-block;margin: 20px;font-size: 30px;">Language:<div id="language" style="font-size: 30px;display: inline-block; _display: inline;">{{language}}</div></p>
+    <p style="display: inline-block;margin: 20px;font-size: 30px;">Problem <div id="problemid" style="font-size: 30px;display: inline-block; _display: inline;">{{problemnumber}}</div></p>
+  {% if status == 'AC'%}
+    <p id="finalstatus" style="color:green;margin: 20px;font-size: 30px;">Status:{{status}}</p>
+    {% elif status != 'WJ...' %}
+    <p id="finalstatus" style="color:red;margin: 20px;font-size: 30px;">Status:{{status}}</p>
+    {%endif%}
+  <p id="finalstatus" style="margin: 20px;font-size: 30px;">Case Num:{{casenum}}</p>
+    <p id="finalstatus" style="margin: 20px;font-size: 30px;">AC Num:{{ac}}</p>
+    <p id="finalstatus" style="margin: 20px;font-size: 30px;">WA Num:{{wa}}</p>
+    <p id="finalstatus" style="margin: 20px;font-size: 30px;">TLE Num:{{tle}}</p>
+    <p id="finalstatus" style="margin: 20px;font-size: 30px;">RE Num:{{re}}</p>
+    <p id="finalstatus" style="margin: 20px;font-size: 30px;">Code:<br>{{code | safe}}</p>
+
+</div>
+
+
+  <script>
+      $(document).ready(function() {
+
+    });
+    </script>

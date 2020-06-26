@@ -19,6 +19,12 @@
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
       <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+        {% if currentuser != "" %}
+        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
+        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        {%else%}
+        <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
+        {%endif%}
     </nav>
   </header>
 
@@ -31,10 +37,12 @@
 <div class="area">
   <p style="margin: 20px;font-size: 30px;">{{ title }}</p>
   <p style="margin: 20px;font-size: 20px;">{{ content | safe }}</p>
+    <p style="margin: 20px;font-size: 20px;">最後に改行を入れてください。</p>
     <form id="submit_form" action="/owlapp/results" method="post" accept-charset="UTF-8">
         {% csrf_token %}
       <div class="form-group">
         <label for="Code" style="font-size: 20px;">Your Code:</label>
+          <input class="form-control" id="problemid" name="problemid" rows="13" autocomplete="off" type="hidden" value="{{ problemid }}"></input>
         <textarea class="form-control" id="codearea" name="code" rows="13" autocomplete="off" style="resize:none;font-size: 20px;"></textarea>
       </div>
       <div class="form-group">
@@ -43,7 +51,6 @@
           <option>C</option>
           <option>C++</option>
           <option>Java</option>
-          <option>C#</option>
           <option>Python3</option>
           <option>Ruby</option>
           <option>Brainfuck</option>

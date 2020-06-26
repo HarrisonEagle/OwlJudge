@@ -19,23 +19,36 @@
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
       <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+        {% if currentuser != "" %}
+        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
+        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        {%else%}
+        <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
+        {%endif%}
     </nav>
   </header>
 
+<div class="menu">
+    <a href="/owlapp" class="tab">CodeTest</a>
+    <a href="/owlapp/problems" class="tab">ProblemTest</a>
+    <a href="/owlapp/submissions" class="currenttab">Submissions</a>
+  </div>
+
 <div class="area">
-  <p style="margin: 20px;font-size: 30px;">Submission #1</p>
-  <br>
-  <p style="margin: 20px;font-size: 30px;">Problem Name:</p>
-  <p style="margin: 20px;font-size: 30px;">Problem Number:{{problemnumber}}</p>
+    <div style="visibility: hidden;" id="initnumber">{{initnumber}}</div>
+  <p style="display: inline-block;margin: 20px;font-size: 30px;">Submission #<div id="submissionid" style="font-size: 30px;display: inline-block; _display: inline;">{{id}}</div></p>
+  <p style="display: inline-block;margin: 20px;font-size: 30px;">Language:<div id="language" style="font-size: 30px;display: inline-block; _display: inline;">{{language}}</div></p>
+    <p style="display: inline-block;margin: 20px;font-size: 30px;">Problem <div id="problemid" style="font-size: 30px;display: inline-block; _display: inline;">{{problemnumber}}</div></p>
   <p id="finalstatus" style="margin: 20px;font-size: 30px;">Status:{{status}}</p>
-  <p style="margin: 20px;font-size: 30px;">Error Messaage:{{message}}</p>
+  <p style="margin: 20px;font-size: 30px;">Error Message:{{message}}</p>
   {% if status == 'WJ...' %}
     <p style="margin: 20px;font-size: 30px;">Test Case: </p>
     {% for _ in range %}
       <div style="display: flex; font-size: 30px;">
         <p style="margin-left: 50px;">case{{ forloop.counter }}.txt</p>
         <p class='caseclass' id='casestatus{{forloop.counter}}' style="margin-left: 50px;">WJ...</p>
-        <p id='timeusage{{forloop.counter}}' style="margin-left: 200px;">WJ...</p>
+        <p id='timeusage{{forloop.counter}}' style="margin-left: 200px;"></p>
+          <p id='memoryusage{{forloop.counter}}' style="margin-left: 200px;"></p>
       </div>
     {% endfor %}
   {% endif %}
@@ -48,20 +61,29 @@
       var itemsProcessed = 0;
       $.each(new Array($('.caseclass').length),
        function(n){
+          var startMsec = new Date();
+          while (new Date() - startMsec < 1000);
         $.ajax({
                         'type': 'get',
                         'url': '/owlapp/judgecode',
                         'data': {
+                            'initnumber':$("#initnumber").text(),
                             'casenumber': n,
-                            'submissionid':1,
-                            'problemid':1
+                            'submissionid':$("#submissionid").text(),
+                            'problemid':$("#problemid").text(),
+                            'language':$("#language").text()
                         },
                         'success': function(data){
                           const obj = JSON.parse(data);
                           $('#casestatus'+(n+1)).text(obj.result);
                           $('#timeusage'+(n+1)).text(obj.timeusage+'ms');
+                          $('#memoryusage'+(n+1)).text(obj.memoryusage+'KB');
                           if(obj.result=='AC'){
                             $('#casestatus'+(n+1)).css('color','green');
+                            if(obj.ac == "true"){
+                                $('#finalstatus').text('Status: AC');
+                                $('#finalstatus').css('color','green');
+                            }
                           }else{
                             $('#casestatus'+(n+1)).css('color','red');
                             if($('#finalstatus').text()=='Status:WJ...'&&obj.result=='TLE'){
