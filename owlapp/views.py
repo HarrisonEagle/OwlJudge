@@ -443,6 +443,7 @@ def judge(request):
     kill = lambda process: process.kill()
     status = 'WJ...'
     output = ''
+    error = ''
     case = Case.objects.filter(questionnumber = int(request.GET.get('problemid', None)))[int(request.GET.get('casenumber', None))]
     datetime1 = datetime.datetime.now().timestamp() * 1000
     datetime2 = 0
