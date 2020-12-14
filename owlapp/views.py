@@ -165,6 +165,10 @@ def subresults(request):
                     output, error = process.communicate() #出力結果とエラー情報の取得
                     if 'error' in str(error):
                        status = 'CE'
+                       dirpath = Path("judge", folder)
+                       logging.debug(dirpath)
+                       if dirpath.exists() and dirpath.is_dir():
+                           shutil.rmtree(dirpath)
                 break
             i+=1
 
@@ -223,6 +227,9 @@ def submit(request):
                     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                     output, error = process.communicate() #出力結果とエラー情報の取得
                     if 'error' in str(error):
+                        dirpath = Path("codetest", folder)
+                        if dirpath.exists() and dirpath.is_dir():
+                            shutil.rmtree(dirpath)
                         response = json.dumps({'result':error.decode('UTF-8')})
                         return HttpResponse(response,content_type="text/javascript")
                 bashCommand = execc1[i]+folder+execc2[i]
@@ -252,7 +259,7 @@ def submit(request):
                         return HttpResponse(response,content_type="text/javascript")
                 break
             i+=1
-        dirpath = Path("codepath", folder)
+        dirpath = Path("codetest", folder)
         logging.debug(dirpath)
         if dirpath.exists() and dirpath.is_dir():
             shutil.rmtree(dirpath)
