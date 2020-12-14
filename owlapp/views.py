@@ -135,7 +135,6 @@ C_INDEX = 1
 cmp = ["gcc","g++","javac"]
 code = ["/main.c","/main.cpp","/Main.java","/main.py","/main.rb","/main.bf"]
 execfile = ["/main","/main","/Main","/main.py","/main.rb","/main.bf"]
-exec = [""]
 
 def subresults(request):
     kill = lambda process: process.kill()

@@ -1,16 +1,13 @@
 from django.db import models
 
-
-
-# Create your models here.
-class SubmittedCode(models.Model):
-    judgeid = models.IntegerField()
+class SubmittedCode(models.Model):#ユーザーが提出したコード
+    judgeid = models.IntegerField(primary_key=True)
     userid = models.IntegerField()
     questionnumber = models.IntegerField()
     username = models.TextField(null=True)
-    language = models.CharField(max_length=20)
-    code = models.TextField(null=True)
-    status = models.CharField(max_length=20)
+    language = models.CharField(max_length=20)#提出言語
+    code = models.TextField(null=True)#コード
+    status = models.CharField(max_length=20)#ステータス
     casenum = models.IntegerField()
     ac = models.IntegerField()
     wa = models.IntegerField()
@@ -19,10 +16,12 @@ class SubmittedCode(models.Model):
 
 
 class Case(models.Model):
-    questionnumber = models.IntegerField() 
-    sinput = models.TextField(null=True)
-    answer = models.TextField(null=True)
+    id = models.IntegerField(primary_key=True)
+    questionnumber = models.IntegerField()
+    sinput = models.TextField(null=True)#入力
+    answer = models.TextField(null=True)#答え
 
 class Question(models.Model):
+    id = models.IntegerField(primary_key=True)
     title = models.TextField(null=True)
     content = models.TextField(null=True)
