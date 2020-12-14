@@ -18,10 +18,10 @@
  <header>
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
-      <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+      <a href="/" class="navbar-brand" style="color: white;">OwlJudge</a>
        {% if currentuser != "" %}
         <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
-        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        <a href="/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
         {%else%}
         <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
         {%endif%}
@@ -29,13 +29,13 @@
   </header>
 
   <div class="menu">
-    <a href="/owlapp" class="currenttab">CodeTest</a>
-    <a href="/owlapp/problems" class="tab">ProblemTest</a>
-    <a href="/owlapp/submissions" class="tab">Submissions</a>
+    <a href="/" class="currenttab">CodeTest</a>
+    <a href="/problems" class="tab">ProblemTest</a>
+    <a href="/submissions" class="tab">Submissions</a>
   </div>
 
 <div class="area">
-    <form id="submit_form" action="/owlapp/submit" method="post" accept-charset="UTF-8">
+    <form id="submit_form" action="/submit" method="post" accept-charset="UTF-8">
         {% csrf_token %}
       <div class="form-group">
         <label for="Code" style="font-size: 20px;">Your Code:</label>
@@ -68,7 +68,7 @@
 
   <script>
     $(document).ready(function() {
-        $('#submit_form').submit(function() { 
+        $('#submit_form').submit(function() {
             $('#res').text('Processing...');
             $('#res').css('color','black');
             $.ajax({

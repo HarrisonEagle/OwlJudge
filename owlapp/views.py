@@ -25,6 +25,8 @@ from . import views
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+import shutil
+from pathlib import Path
 
 def has_digit(text):
     if re.search("\d", text):
@@ -39,7 +41,7 @@ def has_alphabet(text):
 
 def logout_view(request):
     logout(request)
-    return redirect('/owlapp')
+    return redirect('/')
 
 def login_user(request):
     if request.method == 'POST':
@@ -49,7 +51,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             django_login(request, user)
-            return redirect('/owlapp')
+            return redirect('/')
         else:
             login_form.add_error(None, "ユーザー名またはパスワードが異なります。")
             return render(request, 'login.html', {'login_form': login_form})
@@ -75,7 +77,7 @@ def registation_user(request):
             return render(request, 'registration.html', {'registration_form': registration_form})
         user = User.objects.create_user(username=request.POST['username'], password=password,
                                         email=request.POST['email'])
-        return redirect('/owlapp/login')
+        return redirect('/login')
     else:
         registration_form = owlapp.forms.RegistrationForm()
     return render(request, 'registration.html', {'registration_form': registration_form})
@@ -127,63 +129,45 @@ def result(request,id):
         args['currentuser'] = request.user.username
     return TemplateResponse(request, 'result.html',args)
 
+lang = ["C","C++","Java","Python3","Ruby","Brainfuck"]
+COMPILE_INDEX = 2
+C_INDEX = 1
+cmp = ["gcc","g++","javac"]
+code = ["/main.c","/main.cpp","/Main.java","/main.py","/main.rb","/main.bf"]
+execfile = ["/main","/main","/Main","/main.py","/main.rb","/main.bf"]
+exec = [""]
+
 def subresults(request):
     kill = lambda process: process.kill()
     status = 'WJ'
     if request.method == 'POST':
         if request.user.username == "":
-            return redirect('/owlapp/login')
+            return redirect('/login')
         error = ''
         process = ''
-        folder = str(len(os.listdir("judge")))
-        logging.debug(folder)
-        if request.POST['language'] == 'C':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/" + folder+"/main.c", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            bashCommand = "gcc judge/"+folder+"/main.c -o judge/"+folder+"/main"
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            output, error = process.communicate()
-            if 'error' in str(error):
-               status = 'CE'
-              
-        elif request.POST['language'] == 'C++':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/" + folder+"/main.cpp", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            bashCommand = "g++ judge/" + folder+"/main.cpp -o judge/"+folder+"/main"
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            output, error = process.communicate()
-            if 'error' in str(error):
-               status = 'CE'
-        elif request.POST['language'] == 'Java':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/" + folder+"/Main.java", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            bashCommand = "javac judge/" + folder+"/Main.java"
-            process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            output, error = process.communicate()
-            if 'error' in str(error):
-               status = 'CE'
-        elif request.POST['language'] == 'Python3':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/" + folder+"/main.py", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-        elif request.POST['language'] == 'Ruby':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/"+ folder+"/main.rb", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-        elif request.POST['language'] == 'Brainfuck':
-            os.mkdir("judge/" + folder)
-            text_file = open("judge/" + folder+"/main.bf", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            
+        os.makedirs("judge", exist_ok=True)
+        folder = str(SubmittedCode.objects.all().count())
+        i = 0
+        for l in lang:
+            if request.POST['language'] == l:
+                os.mkdir("judge/" + folder)
+                text_file = open("judge/" + folder+code[i], "w")
+                text_file.write(request.POST["code"]) #コードをファイルに書き込む
+                text_file.close()
+                if i <= COMPILE_INDEX: #コンパイル型言語であるかどうかを判断する
+                    bashCommand = ""
+                    if i <= C_INDEX:
+                        bashCommand = cmp[i]+" judge/"+folder+code[i]+" -o judge/"+folder+execfile[i]
+                    else:
+                        bashCommand = cmp[i]+" judge/" + folder+code[i]
+                        logging.debug(bashCommand)
+                    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                    output, error = process.communicate() #出力結果とエラー情報の取得
+                    if 'error' in str(error):
+                       status = 'CE'
+                break
+            i+=1
+
     else:
         raise Http404
     obj = SubmittedCode.objects.create(judgeid=int(folder),language=request.POST['language'],userid = request.user.id,username = request.user.username,questionnumber=int(request.POST['problemid']),
@@ -209,40 +193,50 @@ def subresults(request):
             'message':error.decode('UTF-8')
         })
 
+execc1 = ["./codetest/","./codetest/","cd codetest/","python3 codetest/","ruby codetest/","bf codetest/"]
+execc2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
+
 def submit(request):
     if request.method == 'POST':
+        kill = lambda process: process.kill()
         output = ''
         error = ''
-        process = ''
+        process = None
         timeusage = None
         memoryusage = 0
+        os.makedirs("codetest", exist_ok=True)
         folder = str(len(os.listdir("codetest")))
-        logging.debug(folder)
-        if request.POST['language'] == 'C':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/"+folder+"/main.c", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            command = "gcc codetest/"+folder+"/main.c -o codetest/"+folder+"/main"
-            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output,error = process.communicate()
-            if 'error' in str(error):
-                response = json.dumps({'result':error.decode('UTF-8')})
-                return HttpResponse(response,content_type="text/javascript")
-            else:
-                error = None
-                datetime1 = datetime.datetime.now().timestamp() * 1000
-                command = "./codetest/"+folder+"/main"
-                process = psutil.Popen(command.split(), shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                memoryusage = max(memoryusage,process.memory_info().rss/1024)
-                logging.debug("memory"+str(memoryusage))
+        i = 0
+        for l in lang:
+            if request.POST['language'] == l:
+                os.mkdir("codetest/" + folder)
+                text_file = open("codetest/" + folder+code[i], "w")
+                text_file.write(request.POST["code"]) #コードをファイルに書き込む
+                text_file.close()
+                if i <= COMPILE_INDEX: #コンパイル型言語であるかどうかを判断する
+                    bashCommand = ""
+                    if i <= C_INDEX:
+                        bashCommand = cmp[i]+" codetest/"+folder+code[i]+" -o codetest/"+folder+execfile[i]
+                    else:
+                        bashCommand = cmp[i]+" codetest/" + folder+code[i]
+                        logging.debug(bashCommand)
+                    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                    output, error = process.communicate() #出力結果とエラー情報の取得
+                    if 'error' in str(error):
+                        response = json.dumps({'result':error.decode('UTF-8')})
+                        return HttpResponse(response,content_type="text/javascript")
+                bashCommand = execc1[i]+folder+execc2[i]
+                process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
                 my_timer = Timer(2.1, process.kill)
+                datetime1 = datetime.datetime.now().timestamp() * 1000
+                datetime2 = 0
+                memoryusage = 0
                 try:
                     my_timer.start()
                     flag = False
                     while True:
-                        memoryusage = max(memoryusage, process.memory_info().rss / 1024)
-                        logging.debug("memory" + str(memoryusage))
+                        memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
                         if flag == False:
                             output, error = process.communicate(input=request.POST['inputarea'].encode())
                             flag = True
@@ -251,184 +245,17 @@ def submit(request):
                             break
                 finally:
                     my_timer.cancel()
-                datetime2 = datetime.datetime.now().timestamp() * 1000
-                logging.debug(datetime2-datetime1)
-                if datetime2-datetime1>2.1*1000:
-                    response = json.dumps({'result':'Time Limit Exceed!','timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
-                    return HttpResponse(response,content_type="text/javascript")
-
-        elif request.POST['language'] == 'C++':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/" + folder + "/main.cpp", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            command = "g++ codetest/" + folder + "/main.cpp -o codetest/" + folder + "/main"
-            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, error = process.communicate()
-            if 'error' in str(error):
-                response = json.dumps({'result': error.decode('UTF-8')})
-                return HttpResponse(response, content_type="text/javascript")
-            else:
-                error = None
-                datetime1 = datetime.datetime.now().timestamp() * 1000
-                command = "./codetest/" +  folder + "/main"
-                process = psutil.Popen(command.split(), shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                memoryusage = max(memoryusage, process.memory_info().rss / 1024)
-                logging.debug("memory" + str(memoryusage))
-                my_timer = Timer(2.1, process.kill)
-                try:
-                    my_timer.start()
-                    flag = False
-                    while True:
-                        memoryusage = max(memoryusage, process.memory_info().rss / 1024)
-                        logging.debug("memory" + str(memoryusage))
-                        if flag == False:
-                            output, error = process.communicate(input=request.POST['inputarea'].encode())
-                            flag = True
-                        retCode = process.poll()
-                        if retCode is not None:
-                            break
-                finally:
-                    my_timer.cancel()
-                datetime2 = datetime.datetime.now().timestamp() * 1000
-                logging.debug(datetime2 - datetime1)
-                if datetime2 - datetime1 > 2.1 * 1000:
-                    response = json.dumps({'result': 'Time Limit Exceed!', 'timeusage': str(datetime2 - datetime1),
-                                           'memoryusage': str(memoryusage)})
-                    return HttpResponse(response, content_type="text/javascript")
-        elif request.POST['language'] == 'Java':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/" + folder + "/Main.java", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            command = "javac codetest/" + folder + "/Main.java"
-            process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, error = process.communicate()
-            if 'error' in str(error):
-                response = json.dumps({'result': error.decode('UTF-8')})
-                return HttpResponse(response, content_type="text/javascript")
-            else:
-                error = None
-                datetime1 = datetime.datetime.now().timestamp() * 1000
-                cmd1 = "cd codetest/" + folder
-                cmd2 = "java Main"
-                process = psutil.Popen("{}; {}".format(cmd1, cmd2), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
-                memoryusage = max(memoryusage, process.memory_info().rss / 1024*13)
-                logging.debug("memory" + str(memoryusage))
-                my_timer = Timer(2.1, process.kill)
-                try:
-                    my_timer.start()
-                    flag = False
-                    while True:
-                        memoryusage = max(memoryusage, process.memory_info().rss / 1024*13)
-                        logging.debug("memory" + str(memoryusage))
-                        if flag == False:
-                            output, error = process.communicate(input=request.POST['inputarea'].encode())
-                            flag = True
-                        retCode = process.poll()
-                        if retCode is not None:
-                            break
-                finally:
-                    my_timer.cancel()
-                datetime2 = datetime.datetime.now().timestamp() * 1000
-                logging.debug(datetime2 - datetime1)
-                if datetime2 - datetime1 > 2.1 * 1000:
-                    response = json.dumps({'result': 'Time Limit Exceed!', 'timeusage': str(datetime2 - datetime1),'memoryusage': str(memoryusage)})
-                    return HttpResponse(response, content_type="text/javascript")
-        elif request.POST['language'] == 'Python3':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/" + folder + "/main.py", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            datetime1 = datetime.datetime.now().timestamp() * 1000
-            command = "python3 codetest/" +  folder + "/main.py"
-            process = psutil.Popen(command.split(),stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            memoryusage = max(memoryusage, process.memory_info().rss / 1024*10)
-            logging.debug("memory" + str(memoryusage))
-            my_timer = Timer(2.1, process.kill)
-            try:
-                my_timer.start()
-                flag = False
-                while True:
-                    memoryusage = max(memoryusage, process.memory_info().rss / 1024*10)
-                    logging.debug("memory" + str(memoryusage))
-                    if flag==False:
-                        output, error = process.communicate(input=request.POST['inputarea'].encode())
-                        flag = True
-                    retCode = process.poll()
-                    if retCode is not None:
-                        break
-            finally:
-                my_timer.cancel()
-            datetime2 = datetime.datetime.now().timestamp() * 1000
-            logging.debug(datetime2 - datetime1)
-            if datetime2 - datetime1 > 3.0 * 1000:
-                response = json.dumps({'result': 'Time Limit Exceed!', 'timeusage': str(datetime2 - datetime1),
-                                       'memoryusage': str(memoryusage)})
-                return HttpResponse(response, content_type="text/javascript")
-        elif request.POST['language'] == 'Ruby':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/" + folder + "/main.rb", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            datetime1 = datetime.datetime.now().timestamp() * 1000
-            command = "ruby codetest/" +  folder + "/main.rb"
-            process = psutil.Popen(command.split(),stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            memoryusage = max(memoryusage, process.memory_info().rss / 1024*35)
-            logging.debug("memory" + str(memoryusage))
-            my_timer = Timer(2.1, process.kill)
-            try:
-                my_timer.start()
-                flag = False
-                while True:
-                    memoryusage = max(memoryusage, process.memory_info().rss / 1024*35)
-                    logging.debug("memory" + str(memoryusage))
-                    if flag==False:
-                        output, error = process.communicate(input=request.POST['inputarea'].encode())
-                        flag = True
-                    retCode = process.poll()
-                    if retCode is not None:
-                        break
-            finally:
-                my_timer.cancel()
-            datetime2 = datetime.datetime.now().timestamp() * 1000
-            logging.debug(datetime2 - datetime1)
-            if datetime2 - datetime1 > 3.0 * 1000:
-                response = json.dumps({'result': 'Time Limit Exceed!', 'timeusage': str(datetime2 - datetime1),
-                                       'memoryusage': str(memoryusage)})
-                return HttpResponse(response, content_type="text/javascript")
-        elif request.POST['language'] == 'Brainfuck':
-            os.mkdir("codetest/" + folder)
-            text_file = open("codetest/" + folder + "/main.bf", "w")
-            text_file.write(request.POST["code"])
-            text_file.close()
-            datetime1 = datetime.datetime.now().timestamp() * 1000
-            command = "bf codetest/" +  folder + "/main.bf"
-            process = psutil.Popen(command.split(),stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            memoryusage = max(memoryusage, process.memory_info().rss / 1024)
-            logging.debug("memory" + str(memoryusage))
-            my_timer = Timer(2.1, process.kill)
-            try:
-                my_timer.start()
-                flag = False
-                while True:
-                    memoryusage = max(memoryusage, process.memory_info().rss / 1024)
-                    logging.debug("memory" + str(memoryusage))
-                    if flag==False:
-                        output, error = process.communicate(input=request.POST['inputarea'].encode())
-                        flag = True
-                    retCode = process.poll()
-                    if retCode is not None:
-                        break
-            finally:
-                my_timer.cancel()
-            datetime2 = datetime.datetime.now().timestamp() * 1000
-            logging.debug(datetime2 - datetime1)
-            if datetime2 - datetime1 > 3.0 * 1000:
-                response = json.dumps({'result': 'Time Limit Exceed!', 'timeusage': str(datetime2 - datetime1),
-                                       'memoryusage': str(memoryusage)})
-                return HttpResponse(response, content_type="text/javascript")
+                    datetime2 = datetime.datetime.now().timestamp() * 1000
+                    logging.debug("fisnished")
+                    if datetime2-datetime1>2.1*1000:
+                        response = json.dumps({'result':'Time Limit Exceed!','timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
+                        return HttpResponse(response,content_type="text/javascript")
+                break
+            i+=1
+        dirpath = Path("codepath", folder)
+        logging.debug(dirpath)
+        if dirpath.exists() and dirpath.is_dir():
+            shutil.rmtree(dirpath)
         if(process.returncode==0):
             response = json.dumps({'result':output.decode('UTF-8'),'timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
             return HttpResponse(response,content_type="text/javascript")
@@ -439,49 +266,34 @@ def submit(request):
     else:
         raise Http404
 
+exec1 = ["./judge/","./judge/","cd judge/","python3 judge/","ruby judge/","bf judge/"]
+exec2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
+
 def judge(request):
     kill = lambda process: process.kill()
     status = 'WJ...'
     output = ''
     error = ''
     case = Case.objects.filter(questionnumber = int(request.GET.get('problemid', None)))[int(request.GET.get('casenumber', None))]
-    datetime1 = datetime.datetime.now().timestamp() * 1000
+    datetime1 = 0
     datetime2 = 0
     memoryusage = 0
-    if request.GET.get('language', None) == 'C':
-        bashCommand = "./judge/"+request.GET.get('submissionid', None)+"/main"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    elif request.GET.get('language', None) == 'C++':
-        bashCommand = "./judge/"+request.GET.get('submissionid', None)+"/main"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    elif request.GET.get('language', None) == 'Java':
-        bashCommand = "java judge/"+request.GET.get('submissionid', None)+"/Main.java"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    elif request.GET.get('language', None) == 'Python3':
-        bashCommand = "python3 judge/"+request.GET.get('submissionid', None)+"/main.py"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    elif request.GET.get('language', None) == 'Ruby':
-        bashCommand = "ruby judge/"+request.GET.get('submissionid', None)+"/main.rb"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-    elif request.GET.get('language', None) == 'Brainfuck':
-        bashCommand = "bf judge/"+request.GET.get('submissionid', None)+"/main.bf"
-        process = psutil.Popen(bashCommand.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-
+    i = 0
+    for l in lang:
+        if request.GET.get('language', None) == l:
+            bashCommand = exec1[i]+request.GET.get('submissionid', None)+exec2[i]
+            process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            break
+        i+=1
     memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
-    logging.debug("memory" + str(memoryusage))
+    datetime1 = datetime.datetime.now().timestamp() * 1000
     my_timer = Timer(2.1, process.kill)
     try:
         my_timer.start()
         flag = False
         while True:
             memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
-            logging.debug("memory" + str(memoryusage))
+            logging.debug(case.sinput)
             if flag == False:
                 output, error = process.communicate(case.sinput.encode())
                 flag = True
@@ -498,6 +310,7 @@ def judge(request):
         data.status = 'TLE'
     elif process.returncode != 0:
         status = 'RE'
+        logging.debug(error)
         data.re += 1
         data.status = 'RE'
     elif output.decode('UTF-8') == case.answer+"\n":
@@ -510,9 +323,14 @@ def judge(request):
     if data.ac == data.casenum:
         data.status = "AC"
     data.save()
+    if data.ac + data.wa + data.tle + data.re == data.casenum:
+        dirpath = Path("judge", request.GET.get('submissionid', None))
+        logging.debug(dirpath)
+        if dirpath.exists() and dirpath.is_dir():
+            shutil.rmtree(dirpath) #実行ファイルを削除する
     if data.ac == data.casenum:
         params = {"result":status,"timeusage":str(datetime2-datetime1),"memoryusage":str(memoryusage),"ac":"true"}
     else:
         params = {"result":status,"timeusage":str(datetime2-datetime1),"memoryusage":str(memoryusage),"ac":"false"}
-    json_str = json.dumps(params, ensure_ascii=False, indent=2) 
+    json_str = json.dumps(params, ensure_ascii=False, indent=2)
     return HttpResponse(json_str)

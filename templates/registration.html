@@ -18,12 +18,12 @@
  <header>
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
-      <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+      <a href="/" class="navbar-brand" style="color: white;">OwlJudge</a>
     </nav>
   </header>
 
 <div class="area">
-    <form action="/owlapp/registration" enctype="multipart/form-data" method="POST">
+    <form action="/registration" enctype="multipart/form-data" method="POST">
     {% csrf_token %}
         {% for field in registration_form  %}
       <div class="form-group">

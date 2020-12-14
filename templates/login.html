@@ -28,7 +28,7 @@
      {% if form.errors  %}
     <p>ユーザーID, パスワードが一致しません．</p>
     {% endif %}
-    <form action="/owlapp/login" enctype="multipart/form-data" method="POST">
+    <form action="/login" enctype="multipart/form-data" method="POST">
     {% csrf_token %}
     {% for field in login_form %}
       <div class="form-group">

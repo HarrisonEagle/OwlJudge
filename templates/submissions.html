@@ -18,20 +18,20 @@
  <header>
     <nav class="navbar navbar-dark bg-primary">
       <!-- Navbar content -->
-      <a href="/owlapp" class="navbar-brand" style="color: white;">OwlJudge</a>
+      <a href="/" class="navbar-brand" style="color: white;">OwlJudge</a>
         {% if currentuser != "" %}
         <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
-        <a href="/owlapp/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
+        <a href="/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
         {%else%}
-        <a href="/owlapp/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
+        <a href="/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
         {%endif%}
     </nav>
   </header>
 
   <div class="menu">
-    <a href="/owlapp" class="tab">CodeTest</a>
-    <a href="/owlapp/problems" class="tab">ProblemTest</a>
-    <a href="/owlapp/submissions" class="currenttab">Submissions</a>
+    <a href="/" class="tab">CodeTest</a>
+    <a href="/problems" class="tab">ProblemTest</a>
+    <a href="/submissions" class="currenttab">Submissions</a>
   </div>
 
 <div class="area">
@@ -39,7 +39,7 @@
   <caption>Submission Lists</caption>
   <tr><th>submission </th><th>problem</th><th>username</th><th>language</th><th>result</th></tr>
         {% for object in submissions%}
-        <tr><th><a href="/owlapp/result/{{object.judgeid}}">Submission {{object.judgeid}}</a></th><th>Problem {{object.questionnumber}}</th><th>{{object.username}}</th><th>{{object.language}}</th><th>{{object.status}}</th></tr>
+        <tr><th><a href="/result/{{object.judgeid}}">Submission {{object.judgeid}}</a></th><th>Problem {{object.questionnumber}}</th><th>{{object.username}}</th><th>{{object.language}}</th><th>{{object.status}}</th></tr>
         {% endfor %}
 </table>
 </div>
