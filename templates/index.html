@@ -11,6 +11,7 @@
 
 <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'index.js' %}"></script>
 
 <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -64,30 +65,3 @@
     <p id='time' style="font-size: 25px;"></p>
     <p id='memory' style="font-size: 25px;"></p>
 </div>
-
-
-  <script>
-    $(document).ready(function() {
-        $('#submit_form').submit(function() {
-            $('#res').text('Processing...');
-            $('#res').css('color','black');
-            $.ajax({
-                'url':$('form#submit_form').attr('action'),
-                'type':'POST',
-                'data':$('form#submit_form').serialize(),
-                'dataType':'json',
-                'success':function(response){
-                    if(response.result.includes('error')||response.result.includes('Error')||response.result.includes('Time Limit Exceed!')){
-                        $('#res').css('color','red');
-                    }else{
-                        $('#res').css('color','green');
-                    }
-                    $('#res').html(response.result.replace(/\r?\n/g, '<br>'));
-                    $('#time').text("Time:"+response.timeusage+"ms");
-                    $('#memory').text("MemoryUsage:"+response.memoryusage+"KB");
-                },
-            });
-            return false;
-        });
-    });
-    </script>

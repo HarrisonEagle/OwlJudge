@@ -98,7 +98,7 @@ def submissions(request):
     args = {}
     if request.user != None:
         args['currentuser'] = request.user.username
-    args['submissions'] = SubmittedCode.objects.all().order_by('-id')
+    args['submissions'] = SubmittedCode.objects.all().order_by('-judgeid')
     return TemplateResponse(request, 'submissions.html',args)
 
 
@@ -199,12 +199,13 @@ def subresults(request):
 execc1 = ["./codetest/","./codetest/","cd codetest/","python3 codetest/","ruby codetest/","bf codetest/"]
 execc2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
 
+TIMEOUT = 2.1*1000
+
 def submit(request):
     if request.method == 'POST':
         kill = lambda process: process.kill()
         output = ''
         error = ''
-        process = None
         timeusage = None
         memoryusage = 0
         os.makedirs("codetest", exist_ok=True)
@@ -277,6 +278,7 @@ exec2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
 
 def judge(request):
     kill = lambda process: process.kill()
+    process = None
     status = 'WJ...'
     output = ''
     error = ''
