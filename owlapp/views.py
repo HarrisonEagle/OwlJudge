@@ -27,6 +27,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 import shutil
 from pathlib import Path
+import signal
 
 def has_digit(text):
     if re.search("\d", text):
@@ -234,7 +235,7 @@ def submit(request):
                         response = json.dumps({'result':error.decode('UTF-8')})
                         return HttpResponse(response,content_type="text/javascript")
                 bashCommand = execc1[i]+folder+execc2[i]
-                process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                process = psutil.Popen("exec " +bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
                 my_timer = Timer(2.1, process.kill)
                 datetime1 = datetime.datetime.now().timestamp() * 1000
