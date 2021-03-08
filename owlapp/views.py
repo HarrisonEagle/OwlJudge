@@ -290,7 +290,7 @@ def judge(request):
     for l in lang:
         if request.GET.get('language', None) == l:
             bashCommand = exec1[i]+request.GET.get('submissionid', None)+exec2[i]
-            process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            process = psutil.Popen("exec " +bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             break
         i+=1
     memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
