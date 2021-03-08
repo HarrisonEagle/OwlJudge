@@ -207,6 +207,7 @@ def submit(request):
         output = ''
         error = ''
         timeusage = None
+        response = None
         memoryusage = 0
         os.makedirs("codetest", exist_ok=True)
         folder = str(len(os.listdir("codetest")))
@@ -256,20 +257,18 @@ def submit(request):
                     logging.debug("fisnished")
                     if datetime2-datetime1>2.1*1000:
                         response = json.dumps({'result':'Time Limit Exceed!','timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
-                        return HttpResponse(response,content_type="text/javascript")
                 break
             i+=1
         dirpath = Path("codetest", folder)
-        logging.debug(dirpath)
+        print(response)
         if dirpath.exists() and dirpath.is_dir():
             shutil.rmtree(dirpath)
-        if(process.returncode==0):
+        if process.returncode==0:
             response = json.dumps({'result':output.decode('UTF-8'),'timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
-            return HttpResponse(response,content_type="text/javascript")
-        else:
+        elif response==None:
             logging.debug(error)
             response = json.dumps({'result':'Runtime Error! Error Code:'+str(process.returncode),'timeusage':str(datetime2-datetime1),'memoryusage':str(memoryusage)})
-            return HttpResponse(response,content_type="text/javascript")
+        return HttpResponse(response,content_type="text/javascript")
     else:
         raise Http404
 
