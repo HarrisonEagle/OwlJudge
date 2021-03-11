@@ -84,21 +84,15 @@ def registation_user(request):
     return render(request, 'registration.html', {'registration_form': registration_form})
 
 def index(request):
-    args = {}
-    if request.user != None:
-        args['currentuser'] = request.user.username
-    return TemplateResponse(request, 'index.html', args)
+    return TemplateResponse(request, 'index.html')
 
 def problems(request):
     args = {}
-    if request.user != None:
-        args['currentuser'] = request.user.username
+    args['problems'] = Question.objects.all()
     return TemplateResponse(request, 'problemlist.html',args)
 
 def submissions(request):
     args = {}
-    if request.user != None:
-        args['currentuser'] = request.user.username
     args['submissions'] = SubmittedCode.objects.all().order_by('-judgeid')
     return TemplateResponse(request, 'submissions.html',args)
 
@@ -109,8 +103,6 @@ def problempage(request,id):
     args['title'] = obj.title
     args['content'] = obj.content
     args['problemid'] = id
-    if request.user != None:
-        args['currentuser'] = request.user.username
     return TemplateResponse(request, 'problem.html',args)
 
 def result(request,id):
@@ -126,8 +118,6 @@ def result(request,id):
     args['tle'] = str(obj.tle)
     args['re'] = str(obj.re)
     args['code'] = obj.code.replace('\n','<br>')
-    if request.user != None:
-        args['currentuser'] = request.user.username
     return TemplateResponse(request, 'result.html',args)
 
 lang = ["C","C++","Java","Python3","Ruby","Brainfuck"]
@@ -181,7 +171,6 @@ def subresults(request):
         return render(request, 'subresults.html',{
             'problemnumber':request.POST['problemid'],
             'status':"WJ...",
-            'currentuser':request.user.username,
             'message':error,
             'number':Case.objects.filter(questionnumber = int(request.POST['problemid'])).count(),
             'range':range(Case.objects.filter(questionnumber = int(request.POST['problemid'])).count()),
@@ -193,14 +182,13 @@ def subresults(request):
         return render(request, 'subresults.html',{
             'problemnumber':request.POST['problemid'],
             'status':"Compile Error!",
-            'currentuser': request.user.username,
             'message':error.decode('UTF-8')
         })
 
 execc1 = ["./codetest/","./codetest/","cd codetest/","python3 codetest/","ruby codetest/","bf codetest/"]
-execc2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
+execc2 = ["/main","/main","java Main","/main.py","/main.rb","/main.bf"]
 
-TIMEOUT = 2.1*1000
+TIMEOUT = 2.1
 
 def submit(request):
     if request.method == 'POST':
@@ -234,10 +222,12 @@ def submit(request):
                             shutil.rmtree(dirpath)
                         response = json.dumps({'result':error.decode('UTF-8')})
                         return HttpResponse(response,content_type="text/javascript")
-                bashCommand = execc1[i]+folder+execc2[i]
-                process = psutil.Popen("exec " +bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                bashCommand = "exec " +execc1[i]+folder+execc2[i]
+                if i==2:
+                    bashCommand = execc1[i]+folder+" ;exec "+execc2[i]
+                process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
-                my_timer = Timer(2.1, process.kill)
+                my_timer = Timer(TIMEOUT, process.kill)
                 datetime1 = datetime.datetime.now().timestamp() * 1000
                 datetime2 = 0
                 memoryusage = 0
@@ -247,7 +237,7 @@ def submit(request):
                     while True:
                         memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
                         if flag == False:
-                            output, error = process.communicate(input=request.POST['inputarea'].encode())
+                            output, error = process.communicate(input=request.POST['inputarea'].replace(' ', '\n') .encode())
                             flag = True
                         retCode = process.poll()
                         if retCode is not None:
@@ -274,7 +264,7 @@ def submit(request):
         raise Http404
 
 exec1 = ["./judge/","./judge/","cd judge/","python3 judge/","ruby judge/","bf judge/"]
-exec2 = ["/main","/main"," ; java Main","/main.py","/main.rb","/main.bf"]
+exec2 = ["/main","/main","java Main","/main.py","/main.rb","/main.bf"]
 
 def judge(request):
     kill = lambda process: process.kill()
@@ -289,13 +279,15 @@ def judge(request):
     i = 0
     for l in lang:
         if request.GET.get('language', None) == l:
-            bashCommand = exec1[i]+request.GET.get('submissionid', None)+exec2[i]
-            process = psutil.Popen("exec " +bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            bashCommand = "exec " +exec1[i]+request.GET.get('submissionid', None)+exec2[i]
+            if i==2:
+                bashCommand = exec1[i]+request.GET.get('submissionid', None)+" ;exec "+exec2[i]
+            process = psutil.Popen(bashCommand,shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             break
         i+=1
     memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
     datetime1 = datetime.datetime.now().timestamp() * 1000
-    my_timer = Timer(2.1, process.kill)
+    my_timer = Timer(TIMEOUT, process.kill)
     try:
         my_timer.start()
         flag = False
@@ -303,7 +295,7 @@ def judge(request):
             memoryusage = max(memoryusage, process.memory_info().rss / 1024 * 35)
             logging.debug(case.sinput)
             if flag == False:
-                output, error = process.communicate(case.sinput.encode())
+                output, error = process.communicate(case.sinput.replace(' ', '\n').encode())
                 flag = True
             retCode = process.poll()
             if retCode is not None:

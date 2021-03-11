@@ -1,53 +1,19 @@
-<!DOCTYPE html>
-{% load static %}
-<head>
-    <title>OwlJudge</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block extrahead %}
-      <link href="{% static 'app.css' %}" rel="stylesheet">
-    {% endblock %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-
-<!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-<!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
- <header>
-    <nav class="navbar navbar-dark bg-primary">
-      <!-- Navbar content -->
-      <a href="/" class="navbar-brand" style="color: white;">OwlJudge</a>
-        {% if currentuser != "" %}
-        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
-        <a href="/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
-        {%else%}
-        <a href="/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
-        {%endif%}
-    </nav>
-  </header>
-
-  <div class="menu">
-    <a href="/" class="tab">CodeTest</a>
-    <a href="/problems" class="currenttab">ProblemTest</a>
-    <a href="/submissions" class="tab">Submissions</a>
-  </div>
-
-<div class="area">
-  <p style="margin: 20px;font-size: 30px;">{{ title }}</p>
-  <p style="margin: 20px;font-size: 20px;">{{ content | safe }}</p>
-    <p style="margin: 20px;font-size: 20px;">最後に改行を入れてください。</p>
+{% extends 'base.html' %}
+{% block content %}
+<div class="area p10">
+  <p style="font-size: 30px;">{{ title }}</p>
+  <p style="font-size: 20px;">{{ content | safe }}</p>
+    <p style="font-size: 20px;">最後に改行を入れてください。</p>
     <form id="submit_form" action="/results" method="post" accept-charset="UTF-8">
         {% csrf_token %}
       <div class="form-group">
         <label for="Code" style="font-size: 20px;">Your Code:</label>
-          <input class="form-control" id="problemid" name="problemid" rows="13" autocomplete="off" type="hidden" value="{{ problemid }}"></input>
-        <textarea class="form-control" id="codearea" name="code" rows="13" autocomplete="off" style="resize:none;font-size: 20px;"></textarea>
+          <input class="form-control m5" id="problemid" name="problemid" rows="13" autocomplete="off" type="hidden" value="{{ problemid }}"></input>
+        <textarea class="form-control m5" id="codearea" name="code" rows="13" autocomplete="off" style="resize:none;font-size: 20px;"></textarea>
       </div>
       <div class="form-group">
         <label for="exampleFormControlSelect1" style="font-size: 20px;">Language</label>
-        <select class="form-control" id="language" name="language">
+        <select class="form-control m5" id="language" name="language">
           <option>C</option>
           <option>C++</option>
           <option>Java</option>
@@ -56,6 +22,7 @@
           <option>Brainfuck</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary m5">Submit</button>
     </form>
 </div>
+{% endblock %}

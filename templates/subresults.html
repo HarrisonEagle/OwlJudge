@@ -1,40 +1,5 @@
-<!DOCTYPE html>
-{% load static %}
-<head>
-    <title>OwlJudge</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block extrahead %}
-      <link href="{% static 'app.css' %}" rel="stylesheet">
-    {% endblock %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-
-<!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-<!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="{% static 'subresults.js' %}"></script>
-</head>
- <header>
-    <nav class="navbar navbar-dark bg-primary">
-      <!-- Navbar content -->
-      <a href="/" class="navbar-brand" style="color: white;">OwlJudge</a>
-        {% if currentuser != "" %}
-        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{currentuser}}</div>
-        <a href="/logout" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
-        {%else%}
-        <a href="/login" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
-        {%endif%}
-    </nav>
-  </header>
-
-<div class="menu">
-    <a href="/" class="tab">CodeTest</a>
-    <a href="/problems" class="tab">ProblemTest</a>
-    <a href="/submissions" class="currenttab">Submissions</a>
-  </div>
-
+{% extends 'base.html' %}
+{% block content %}
 <div class="area">
     <div style="visibility: hidden;" id="initnumber">{{initnumber}}</div>
   <p style="display: inline-block;margin: 20px;font-size: 30px;">Submission #<div id="submissionid" style="font-size: 30px;display: inline-block; _display: inline;">{{id}}</div></p>
@@ -54,3 +19,4 @@
     {% endfor %}
   {% endif %}
 </div>
+{% endblock %}

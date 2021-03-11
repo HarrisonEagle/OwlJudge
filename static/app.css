@@ -18,3 +18,19 @@ body{
   color: whitesmoke;
   background-color: blue;
 }
+
+.m0{
+  margin-bottom: 0px!important;
+}
+
+.p10{
+  padding: 10px;
+}
+
+.pl10{
+  padding-left: 10px;
+}
+
+.m5{
+  margin: 5px 0 5px 0;
+}
