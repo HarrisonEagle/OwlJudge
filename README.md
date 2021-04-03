@@ -8,11 +8,11 @@ Djangoベースのオンラインジャッジシステムです。
 C、C++、Python3、Ruby、Java3、Brainfuck
 
 ### 依存ライブラリー
-gcc g++ python3 ruby bf python3 python3-pip openjdk-8-jdk django psutil
+gcc g++ ruby bf python3 python3-pip openjdk-8-jdk django psutil
 
 ## 1.ライブラリーの導入
 ```
-sudo apt install gcc g++ python3 ruby bf python3 python3-pip openjdk-8-jdk
+sudo apt install gcc g++ ruby bf python3 python3-pip openjdk-8-jdk
 pip3 install django psutil
 ```
 
