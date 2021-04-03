@@ -4,5 +4,5 @@ codetest/*
 __pycache__
 *.pyc
 env/
-postgres_data/
+postgres_data/*
 db.sqlite3
