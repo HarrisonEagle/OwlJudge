@@ -16,12 +16,10 @@ class SubmittedCode(models.Model):#ユーザーが提出したコード
 
 
 class Case(models.Model):
-    id = models.IntegerField(primary_key=True)
     questionnumber = models.IntegerField()
     sinput = models.TextField(null=True)#入力
     answer = models.TextField(null=True)#答え
 
 class Question(models.Model):
-    id = models.IntegerField(primary_key=True)
     title = models.TextField(null=True)
     content = models.TextField(null=True)

@@ -24,7 +24,7 @@
       <!-- Navbar content -->
       <a href="{% url 'index' %}" class="navbar-brand" style="color: white;">OwlJudge</a>
        {% if user.username %}
-        <div class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">{{user.username}}</div>
+        <div class="navbar-brand" style="color: white;margin-left:70%;font-size:15px;">{{user.username}}</div>
         <a href="{% url 'logout' %}" class="navbar-brand" style="color: white;font-size:15px;">ログアウト</a>
         {% else %}
         <a href="{% url 'login' %}" class="navbar-brand" style="color: white;margin-left:80%;font-size:15px;">ログイン</a>
