@@ -10,16 +10,18 @@ C、C++、Python3、Ruby、Java3、Brainfuck
 ### 依存ライブラリー
 gcc g++ ruby bf python3 python3-pip openjdk-8-jdk django psutil gunicorn whitenoise nginx
 
-## 1.Dockerのビルド
+## 1.Dockerのビルド＆ローカル環境の初期化
 ```
 docker-compose build
+docker-compose up -d
+docker exec -it owljudge_web_1 python3 manage.py migrate
 ```
 
 ## 2.コンテナの起動
 ```
 docker-compose up -d
 ```
-
+コンテナが全て起動してあれば、http://localhost:8000 にアクセスとOwlJudgeが開きます。
 
 ## 3.問題の作成、サンプルケースの作成
 ### (1)管理者ユーザーの作成
