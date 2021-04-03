@@ -21,7 +21,7 @@ docker exec -it owljudge_web_1 python3 manage.py migrate
 ```
 docker-compose up -d
 ```
-コンテナが全て起動してあれば、http://localhost:8000 にアクセスとOwlJudgeが開きます。
+コンテナが全て起動した場合、http://localhost:8000 にアクセスするとOwlJudgeが開きます。
 
 ## 3.問題の作成、サンプルケースの作成
 ### (1)管理者ユーザーの作成
