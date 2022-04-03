@@ -11,6 +11,30 @@ C、C++、Python3、Ruby、Java、Brainfuck
 gcc g++ ruby bf python3 python3-pip openjdk-8-jdk django psutil gunicorn whitenoise nginx
 
 ## 1.Dockerのビルド＆ローカル環境の初期化
+まずは下記のテンプレートを使って`.env`と`.env-db`を作成します。
+- `.env`
+```
+DEBUG=1
+SECRET_KEY=
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+
+DB_ENGINE=
+DB_TYPE=
+DB_DATABASE_NAME=
+DB_USERNAME=
+DB_PASSWORD=
+DB_HOST=db
+DB_PORT=5432
+```
+- `.env-db`
+```
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+```
+次に、下記のコマンドを実行します:
 ```
 docker-compose build
 docker-compose up -d
