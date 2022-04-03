@@ -5,7 +5,7 @@ Djangoベースのオンラインジャッジシステムです。
 関連記事:https://blog.misw.jp/entry/2020/12/17/000000
 
 ### 使用できる言語:
-C、C++、Python3、Ruby、Java3、Brainfuck
+C、C++、Python3、Ruby、Java、Brainfuck
 
 ### 依存ライブラリー
 gcc g++ ruby bf python3 python3-pip openjdk-8-jdk django psutil gunicorn whitenoise nginx
