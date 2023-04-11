@@ -1,0 +1,99 @@
+・Vue
+
+<template>
+  <div>
+    <h1>File Upload</h1>
+    <p>Please select files you want to upload.</p>
+    <input type="file" name="files" multiple v-on:change="selectFiles">
+    <div>
+      <ul>
+        <li v-for="file in selectedFiles">
+          {{ file.name }}
+        </li>
+      </ul>
+    </div>
+    <button v-on:click="submitFiles">Submit</button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      selectedFiles: []
+    }
+  },
+  methods: {
+    selectFiles(event) {
+      this.selectedFiles = event.target.files;
+    },
+    submitFiles() {
+      const formData = new FormData();
+      for (let i = 0; i < this.selectedFiles.length; i++) {
+        formData.append('files', this.selectedFiles[i]);
+      }
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+    }
+  }
+}
+</script>
+
+・HTML
+
+<div>
+  <h1>File Upload</h1>
+  <p>Please select files you want to upload.</p>
+  <input type="file" name="files" multiple />
+  <div>
+    <ul>
+      <li>
+      </li>
+    </ul>
+  </div>
+  <button>Submit</button>
+</div>
+
+
+・CSS
+
+h1 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #222222;
+  margin-bottom: 10px;
+}
+p {
+  font-size: 14px;
+  color: #999999;
+  margin-bottom: 20px;
+}
+input[type="file"] {
+  width: 300px;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+li {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 5px;
+}
+button {
+  width: 100px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #1e90ff;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
